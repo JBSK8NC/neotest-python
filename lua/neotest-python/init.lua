@@ -57,10 +57,10 @@ local get_runner = function(python_command)
   if vim_test_runner == "pyunit" then
     return "unittest"
   end
-  if vim_test_runner and lib.func_util.index({ "unittest", "pytest" }, vim_test_runner) then
+  if vim_test_runner and lib.func_util.index({ "unittest", "pytest", "djangotest" }, vim_test_runner) then
     return vim_test_runner
   end
-  local runner = base.module_exists("pytest", python_command) and "pytest" or "unittest"
+  local runner = "django"
   stored_runners[command_str] = runner
   return runner
 end
@@ -69,7 +69,7 @@ end
 local PythonNeotestAdapter = { name = "neotest-python" }
 
 PythonNeotestAdapter.root =
-lib.files.match_root_pattern("pyproject.toml", "setup.cfg", "mypy.ini", "pytest.ini", "setup.py")
+  lib.files.match_root_pattern("pyproject.toml", "setup.cfg", "mypy.ini", "pytest.ini", "setup.py", "manage.py")
 
 function PythonNeotestAdapter.is_test_file(file_path)
   return is_test_file(file_path)
