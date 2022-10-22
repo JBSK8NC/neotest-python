@@ -16,7 +16,6 @@ from .base import NeotestAdapter, NeotestResultStatus
 
 
 class DjangoNeotestAdapter(NeotestAdapter):
-
     def id_to_unittest_args(self, case_id: str) -> List[str]:
         """Converts a neotest ID into test specifier for unittest"""
         path, *child_ids = case_id.split("::")
@@ -37,9 +36,10 @@ class DjangoNeotestAdapter(NeotestAdapter):
         return [".".join([relative_dotted, *child_ids])]
 
     def run(self, args: List[str], stream) -> Dict:
-        
         class NeotestTextTestResult(TextTestResult):
-            def __init__(self, stream: TextIO, descriptions: bool, verbosity: int) -> None:
+            def __init__(
+                self, stream: TextIO, descriptions: bool, verbosity: int
+            ) -> None:
                 super().__init__(stream, descriptions, verbosity)
                 self.neo_results = {}
 
@@ -62,6 +62,7 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 error_line = None
                 case_file = self.case_file(test)
                 trace = err[2]
+                print(f"trace {trace}")
                 summary = traceback.extract_tb(trace)
                 error_line = next(
                     frame.lineno - 1
@@ -81,12 +82,14 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 error_line = None
                 case_file = self.case_file(test)
                 trace = err[2]
+                print(f"error trace {trace}")
                 summary = traceback.extract_tb(trace)
                 error_line = next(
                     frame.lineno - 1
                     for frame in reversed(summary)
                     if frame.filename == case_file
                 )
+                print(f"errprlins: {error_line}")
                 self.neo_results[case_id] = {
                     "status": NeotestResultStatus.FAILED,
                     "errors": [{"message": None, "line": error_line}],
@@ -103,7 +106,7 @@ class DjangoNeotestAdapter(NeotestAdapter):
 
         class NeotestDjangoRunner(DiscoverRunner):
             def __init__(self, **kwargs):
-                super().__init__(interactive=False, **kwargs)
+                super().__init__(interactive=False, keepdb=True, **kwargs)
 
             def get_resultclass(self) -> NeotestTextTestResult:
                 return NeotestTextTestResult

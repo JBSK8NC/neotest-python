@@ -9,7 +9,7 @@ from neotest_python.base import NeotestResult
 class TestRunner(str, Enum):
     PYTEST = "pytest"
     UNITTEST = "unittest"
-    DJANGO = "djangotest"
+    DJANGOTEST = "djangotest"
 
 def get_adapter(runner: TestRunner):
     if runner == TestRunner.PYTEST:
@@ -21,7 +21,7 @@ def get_adapter(runner: TestRunner):
 
         return UnittestNeotestAdapter()
 
-    elif runner == TestRunner.DJANGO:
+    elif runner == TestRunner.DJANGOTEST:
         from .djangotest import DjangoNeotestAdapter
         return DjangoNeotestAdapter()
     raise NotImplementedError(runner)
