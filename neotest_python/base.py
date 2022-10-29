@@ -31,6 +31,7 @@ else:
 
 
 class NeotestAdapter(abc.ABC):
+
     def update_result(
         self, base: Optional[NeotestResult], update: NeotestResult
     ) -> NeotestResult:
