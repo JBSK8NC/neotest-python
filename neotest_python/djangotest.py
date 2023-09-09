@@ -58,13 +58,10 @@ class DjangoNeotestAdapter(NeotestAdapter):
             def case_id(self, case: "TestCase | TestSuite") -> str:
                 return "::".join(self.case_id_elems(case))
 
-            def addFailure(self, test: TestCase, err) -> None:
-                super().addFailure(test, err)
+            def update_neo_result_errors(self, test: TestCase, err) -> None:
                 case_id = self.case_id(test)
-                error_line = None
                 case_file = self.case_file(test)
-                trace = err[2]
-                summary = traceback.extract_tb(trace)
+                summary = traceback.extract_tb(err[2])
                 error_line = next(
                     frame.lineno - 1
                     for frame in reversed(summary)
@@ -73,28 +70,17 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 self.neo_results[case_id] = {
                     "status": NeotestResultStatus.FAILED,
                     "errors": [{"message": str(err[1]), "line": error_line}],
-                    "short": None,
+                    "short": str(err[1]),
                 }
                 stream(case_id, self.neo_results[case_id])
 
+            def addFailure(self, test: TestCase, err) -> None:
+                super().addFailure(test, err)
+                self.update_neo_result_errors(test, err)
+
             def addError(self, test: TestCase, err) -> None:
                 super().addError(test, err)
-                case_id = self.case_id(test)
-                error_line = None
-                case_file = self.case_file(test)
-                trace = err[2]
-                summary = traceback.extract_tb(trace)
-                error_line = next(
-                    frame.lineno - 1
-                    for frame in reversed(summary)
-                    if frame.filename == case_file
-                )
-                self.neo_results[case_id] = {
-                    "status": NeotestResultStatus.FAILED,
-                    "errors": [{"message": str(err[1]), "line": error_line}],
-                    "short": None,
-                }
-                stream(case_id, self.neo_results[case_id])
+                self.update_neo_result_errors(test, err)
 
             def addSuccess(self, test: TestCase) -> None:
                 super().addSuccess(test)
