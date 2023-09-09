@@ -47,6 +47,8 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 return str(Path(inspect.getmodule(case).__file__).absolute())  # type: ignore
 
             def case_id_elems(self, case) -> List[str]:
+                if case.__class__.__name__ == '_SubTest':
+                    case = case.test_case
                 file = self.case_file(case)
                 elems = [file, case.__class__.__name__]
                 if isinstance(case, TestCase):
@@ -71,7 +73,7 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 )
                 self.neo_results[case_id] = {
                     "status": NeotestResultStatus.FAILED,
-                    "errors": [{"message": None, "line": error_line}],
+                    "errors": [{"message": str(err[1]), "line": error_line}],
                     "short": None,
                 }
                 stream(case_id, self.neo_results[case_id])
@@ -92,7 +94,7 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 print(f"errprlins: {error_line}")
                 self.neo_results[case_id] = {
                     "status": NeotestResultStatus.FAILED,
-                    "errors": [{"message": None, "line": error_line}],
+                    "errors": [{"message": str(err[1]), "line": error_line}],
                     "short": None,
                 }
                 stream(case_id, self.neo_results[case_id])
