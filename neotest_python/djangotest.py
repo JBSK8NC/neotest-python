@@ -64,7 +64,6 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 error_line = None
                 case_file = self.case_file(test)
                 trace = err[2]
-                print(f"trace {trace}")
                 summary = traceback.extract_tb(trace)
                 error_line = next(
                     frame.lineno - 1
@@ -84,14 +83,12 @@ class DjangoNeotestAdapter(NeotestAdapter):
                 error_line = None
                 case_file = self.case_file(test)
                 trace = err[2]
-                print(f"error trace {trace}")
                 summary = traceback.extract_tb(trace)
                 error_line = next(
                     frame.lineno - 1
                     for frame in reversed(summary)
                     if frame.filename == case_file
                 )
-                print(f"errprlins: {error_line}")
                 self.neo_results[case_id] = {
                     "status": NeotestResultStatus.FAILED,
                     "errors": [{"message": str(err[1]), "line": error_line}],
@@ -119,7 +116,6 @@ class DjangoNeotestAdapter(NeotestAdapter):
         # Make sure we can import relative to current path
         sys.path.insert(0, os.getcwd())
         # We only get a single case ID as the argument
-        print(f"Args {args}")
         argv = sys.argv[0:1] + self.id_to_unittest_args(args[-1])
         django.setup()
         test_runner = NeotestDjangoRunner()
